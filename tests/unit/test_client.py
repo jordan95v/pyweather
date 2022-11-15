@@ -3,9 +3,9 @@ import httpx
 import pytest
 from pytest_mock import MockerFixture
 from conftest import MockResponse
-from core import Client
-from core.models import AirPollution, Current, Forecast, Geocoding
-from core.utils.exceptions import WeatherError
+from pyweather import Client
+from pyweather.models import AirPollution, Current, Forecast, Geocoding
+from pyweather.utils.exceptions import WeatherError
 
 
 @pytest.fixture()

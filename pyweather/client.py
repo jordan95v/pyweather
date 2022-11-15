@@ -4,9 +4,9 @@ from dataclasses import dataclass
 from types import TracebackType
 from typing import Any
 import httpx
-from core.models import AirPollution, Current, Forecast, Geocoding
-from core.utils.exceptions import WeatherError
-from core.utils.weather_path import WeatherPath
+from pyweather.models import AirPollution, Current, Forecast, Geocoding
+from pyweather.utils.exceptions import WeatherError
+from pyweather.utils.weather_path import WeatherPath
 
 __all__: list[str] = ["Client"]
 
