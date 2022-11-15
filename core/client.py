@@ -33,7 +33,7 @@ class Client:
             httpx.Response: Response from the API.
         """
 
-        params.update(dict(app_id=self.app_id))
+        params.update(dict(appid=self.app_id))
         res: httpx.Response = await self._session.get(
             url=f"{self.base_url}{url}", params=params
         )
@@ -62,7 +62,7 @@ class Client:
     async def get_current(
         self,
         country_code: str | None,
-        zipcode: int | None,
+        zipcode: str | None,
     ) -> Current:
         """Get the current weather for a given city.
 
@@ -74,16 +74,14 @@ class Client:
             Current: The current weather class representation for the given city.
         """
 
-        geo: Geocoding = await self._get_location(
-            dict(zip=f"{zipcode}, {country_code}")
-        )
+        geo: Geocoding = await self._get_location(dict(zip=f"{zipcode},{country_code}"))
         res: httpx.Response = await self._call(
             url=WeatherPath.CURRENT.value, params=dict(lat=geo.lat, lon=geo.lon)
         )
         return Current(**res.json())
 
     async def get_forecast(
-        self, country_code: str | None, zipcode: int | None
+        self, country_code: str | None, zipcode: str | None
     ) -> Forecast:
         """Get the forecast weather for a given city.
 
@@ -95,9 +93,7 @@ class Client:
             Forecast: The forecast weather class representation for the given city.
         """
 
-        geo: Geocoding = await self._get_location(
-            dict(zip=f"{zipcode}, {country_code}")
-        )
+        geo: Geocoding = await self._get_location(dict(zip=f"{zipcode},{country_code}"))
         res: httpx.Response = await self._call(
             url=WeatherPath.FORECAST.value, params=dict(lat=geo.lat, lon=geo.lon)
         )
@@ -117,4 +113,4 @@ class Client:
     ) -> None:
         await self.close()
         if err_type is not None:
-            raise WeatherError(err_value) from err_type
+            raise WeatherError(err_value)
