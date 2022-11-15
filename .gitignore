@@ -1,2 +1,4 @@
 venv/
 .mypy_cache/
+.coverage
+__pycache__/

@@ -1,6 +1,7 @@
 from __future__ import annotations
+from datetime import datetime
 from pydantic import BaseModel, Field
-from common_fields import Coord, Main, WeatherItem, Clouds, Wind
+from .common_fields import Coord, Main, WeatherItem, Clouds, Wind
 
 
 class Rain(BaseModel):
@@ -11,8 +12,8 @@ class Sys(BaseModel):
     type: int | None = None
     id: int | None = None
     country: str | None = None
-    sunrise: int | None = None
-    sunset: int | None = None
+    sunrise: datetime | None = None
+    sunset: datetime | None = None
 
 
 class Current(BaseModel):
@@ -24,7 +25,7 @@ class Current(BaseModel):
     wind: Wind | None = None
     rain: Rain | None = None
     clouds: Clouds | None = None
-    dt: int | None = None
+    dt: datetime | None = None
     sys: Sys | None = None
     timezone: int | None = None
     id: int | None = None
