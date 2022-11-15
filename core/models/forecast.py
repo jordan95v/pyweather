@@ -19,7 +19,7 @@ class Sys(BaseModel):
 
 
 class Cast(BaseModel):
-    dt: int | None = None
+    dt: datetime | None = None
     main: ForecastMain | None = None
     weather: list[WeatherItem] | None = None
     clouds: Clouds | None = None

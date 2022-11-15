@@ -1,9 +1,10 @@
 from __future__ import annotations
+from urllib.parse import urljoin
 from dataclasses import dataclass
 from types import TracebackType
 from typing import Any
 import httpx
-from core.models import Current, Forecast, Geocoding, AirPollution
+from core.models import AirPollution, Current, Forecast, Geocoding
 from core.utils.exceptions import WeatherError
 from core.utils.weather_path import WeatherPath
 
@@ -35,7 +36,7 @@ class Client:
 
         params.update(dict(appid=self.app_id))
         res: httpx.Response = await self._session.get(
-            url=f"{self.base_url}{url}", params=params
+            url=urljoin(self.base_url, url), params=params
         )
         try:
             res.raise_for_status()
