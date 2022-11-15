@@ -1,17 +1,22 @@
+from unittest.mock import MagicMock
 import httpx
 import pytest
 from pytest_mock import MockerFixture
 from conftest import MockResponse
 from core import Client
-from core.models import Current, Geocoding
+from core.models import Current, Geocoding, Forecast
 from core.utils.exceptions import WeatherError
+
+
+@pytest.fixture()
+def client() -> Client:
+    return Client(app_id="hola chica :)")
 
 
 @pytest.mark.asyncio
 class TestClient:
-    async def test_init(self):
-        client: Client = Client(app_id="hello you :)")
-        assert client.app_id == "hello you :)"
+    async def test_init(self, client: Client):
+        assert client.app_id == "hola chica :)"
         assert client.base_url == "https://api.openweathermap.org"
 
     @pytest.mark.parametrize(
@@ -22,9 +27,12 @@ class TestClient:
         ],
     )
     async def test_call(
-        self, status_code: int, throwable: Exception | None, mocker: MockerFixture
+        self,
+        client: Client,
+        status_code: int,
+        throwable: Exception | None,
+        mocker: MockerFixture,
     ):
-        client: Client = Client(app_id="hello you :)")
         mocker.patch.object(
             httpx.AsyncClient,
             "get",
@@ -39,8 +47,7 @@ class TestClient:
             ret: httpx.Response = await client._call(url="/hello/you", params=dict())
             assert ret.status_code == 200
 
-    async def test_geo(self, mocker: MockerFixture) -> None:
-        client: Client = Client(app_id="hola gringo")
+    async def test_geo(self, client: Client, mocker: MockerFixture) -> None:
         mocker.patch.object(
             httpx.AsyncClient,
             "get",
@@ -49,8 +56,7 @@ class TestClient:
         res: Geocoding = await client._get_location(params=dict())
         assert res.name == "Beverly Hills"
 
-    async def test_get_current(self, mocker: MockerFixture) -> None:
-        client: Client = Client(app_id="hola gringo")
+    async def test_get_current(self, client: Client, mocker: MockerFixture) -> None:
         mocker.patch.object(client, "_get_location")
         mocker.patch.object(
             httpx.AsyncClient,
@@ -59,3 +65,31 @@ class TestClient:
         )
         current: Current = await client.get_current(country_code="FR", zipcode=75000)
         assert current.name == "Zocca"
+
+    async def test_get_forecast(self, client: Client, mocker: MockerFixture) -> None:
+        mocker.patch.object(client, "_get_location")
+        mocker.patch.object(
+            httpx.AsyncClient,
+            "get",
+            return_value=MockResponse(status_code=200, sample_name="forecast"),
+        )
+        current: Forecast = await client.get_forecast(country_code="FR", zipcode=75000)
+        assert current.city.name == "Zocca"
+
+    async def test__aenter__(
+        self,
+        client: Client,
+    ) -> None:
+        assert isinstance(await client.__aenter__(), Client)
+
+    @pytest.mark.parametrize("throwable", [(None), (TypeError)])
+    async def test__aexit__(
+        self, client: Client, mocker: MockerFixture, throwable: Exception | None
+    ) -> None:
+        spy: MagicMock = mocker.spy(client, "close")
+        if throwable:
+            with pytest.raises(WeatherError):
+                await client.__aexit__(TypeError, None, None)
+        else:
+            await client.__aexit__(None, None, None)
+            assert spy.call_count == 1

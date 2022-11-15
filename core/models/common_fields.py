@@ -1,6 +1,8 @@
 from __future__ import annotations
 from pydantic import BaseModel
 
+__all__: list[str] = ["Coord", "WeatherItem", "Wind", "Clouds", "Main"]
+
 
 class Coord(BaseModel):
     lon: float | None = None

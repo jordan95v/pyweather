@@ -1,5 +1,7 @@
 import enum
 
+__all__: list[str] = ["WeatherPath"]
+
 
 class WeatherPath(enum.Enum):
     """List all available path for WeatherOpenMap free tier."""

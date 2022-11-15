@@ -3,6 +3,8 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 from .common_fields import Coord, Main, WeatherItem, Clouds, Wind
 
+__all__: list[str] = ["Rain", "Sys", "Current"]
+
 
 class Rain(BaseModel):
     field_1h: float | None = Field(None, alias="1h")

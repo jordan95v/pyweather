@@ -1,9 +1,13 @@
+from __future__ import annotations
 from dataclasses import dataclass
+from types import TracebackType
 from typing import Any
 import httpx
-from core.models import Current, Geocoding
+from core.models import Current, Forecast, Geocoding
 from core.utils.exceptions import WeatherError
 from core.utils.weather_path import WeatherPath
+
+__all__: list[str] = ["Client"]
 
 
 @dataclass
@@ -41,6 +45,15 @@ class Client:
             return res
 
     async def _get_location(self, params: dict[str, Any]) -> Geocoding:
+        """Get the location for the given zipcode and country code.
+
+        Args:
+            params: Dict containing zipcode and country code.
+
+        Return:
+            Geocoding: Class representation of the API response.
+        """
+
         ret: httpx.Response = await self._call(
             url=WeatherPath.GEOCODING.value, params=params
         )
@@ -58,7 +71,7 @@ class Client:
             zipcode: The city zipcode.
 
         Return:
-            Current: The current weather for the given city.
+            Current: The current weather class representation for the given city.
         """
 
         geo: Geocoding = await self._get_location(
@@ -68,3 +81,40 @@ class Client:
             url=WeatherPath.CURRENT.value, params=dict(lat=geo.lat, lon=geo.lon)
         )
         return Current(**res.json())
+
+    async def get_forecast(
+        self, country_code: str | None, zipcode: int | None
+    ) -> Forecast:
+        """Get the forecast weather for a given city.
+
+        Args:
+            country_code: The country code.
+            zipcode: The city zipcode.
+
+        Return:
+            Forecast: The forecast weather class representation for the given city.
+        """
+
+        geo: Geocoding = await self._get_location(
+            dict(zip=f"{zipcode}, {country_code}")
+        )
+        res: httpx.Response = await self._call(
+            url=WeatherPath.FORECAST.value, params=dict(lat=geo.lat, lon=geo.lon)
+        )
+        return Forecast(**res.json())
+
+    async def close(self):
+        await self._session.aclose()
+
+    async def __aenter__(self) -> Client:
+        return self
+
+    async def __aexit__(
+        self,
+        err_type: type[Exception] | None,
+        err_value: Exception | None,
+        err_tb: TracebackType | None,
+    ) -> None:
+        await self.close()
+        if err_type is not None:
+            raise WeatherError(err_value) from err_type

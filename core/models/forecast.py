@@ -3,6 +3,8 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 from .common_fields import Coord, Main, WeatherItem, Clouds, Wind
 
+__all__: list[str] = ["ForecastMain", "Sys", "Rain", "Cast", "City", "Forecast"]
+
 
 class ForecastMain(Main):
     temp_kf: float | None = None
