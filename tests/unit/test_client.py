@@ -4,7 +4,7 @@ import pytest
 from pytest_mock import MockerFixture
 from conftest import MockResponse
 from core import Client
-from core.models import Current, Geocoding, Forecast
+from core.models import AirPollution, Current, Forecast, Geocoding
 from core.utils.exceptions import WeatherError
 
 
@@ -63,7 +63,7 @@ class TestClient:
             "get",
             return_value=MockResponse(status_code=200, sample_name="current"),
         )
-        current: Current = await client.get_current(country_code="FR", zipcode=75000)
+        current: Current = await client.get_current(country_code="FR", zipcode="75000")
         assert current.name == "Zocca"
 
     async def test_get_forecast(self, client: Client, mocker: MockerFixture) -> None:
@@ -73,8 +73,24 @@ class TestClient:
             "get",
             return_value=MockResponse(status_code=200, sample_name="forecast"),
         )
-        current: Forecast = await client.get_forecast(country_code="FR", zipcode=75000)
+        current: Forecast = await client.get_forecast(
+            country_code="FR", zipcode="75000"
+        )
         assert current.city.name == "Zocca"
+
+    async def test_get_air_pollution(
+        self, client: Client, mocker: MockerFixture
+    ) -> None:
+        mocker.patch.object(client, "_get_location")
+        mocker.patch.object(
+            httpx.AsyncClient,
+            "get",
+            return_value=MockResponse(status_code=200, sample_name="air_pollution"),
+        )
+        air: AirPollution = await client.get_air_pollution(
+            country_code="FR", zipcode="75000"
+        )
+        assert air.coord == [50, 50]
 
     async def test__aenter__(
         self,

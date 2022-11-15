@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from types import TracebackType
 from typing import Any
 import httpx
-from core.models import Current, Forecast, Geocoding
+from core.models import Current, Forecast, Geocoding, AirPollution
 from core.utils.exceptions import WeatherError
 from core.utils.weather_path import WeatherPath
 
@@ -98,6 +98,25 @@ class Client:
             url=WeatherPath.FORECAST.value, params=dict(lat=geo.lat, lon=geo.lon)
         )
         return Forecast(**res.json())
+
+    async def get_air_pollution(
+        self, country_code: str | None, zipcode: str | None
+    ) -> AirPollution:
+        """Get the forecast weather for a given city.
+
+        Args:
+            country_code: The country code.
+            zipcode: The city zipcode.
+
+        Return:
+            Forecast: The forecast weather class representation for the given city.
+        """
+
+        geo: Geocoding = await self._get_location(dict(zip=f"{zipcode},{country_code}"))
+        res: httpx.Response = await self._call(
+            url=WeatherPath.AIR_POLLUTION.value, params=dict(lat=geo.lat, lon=geo.lon)
+        )
+        return AirPollution(**res.json())
 
     async def close(self):
         await self._session.aclose()
