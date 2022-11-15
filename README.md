@@ -16,6 +16,12 @@ C:/Users/you/pyweather> venv/Scripts/activate # venv\bin\activate on Mac
 
 And you're set to go !
 
+## Coverage
+
+Here is the `pytest` code coverage:
+
+![test_coverage](tests/coverage.png)
+
 ## Workflow
 
 ### Get the current weather for a given city
