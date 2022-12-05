@@ -1,3 +1,2 @@
-datamodel-code-generator
 httpx
 python-dotenv
