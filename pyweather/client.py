@@ -34,7 +34,7 @@ class Client:
             httpx.Response: Response from the API.
         """
 
-        params.update(dict(appid=self.app_id))
+        params.update(dict(appid=self.app_id, units="metric"))
         res: httpx.Response = await self._session.get(
             url=urljoin(self.base_url, url), params=params
         )
